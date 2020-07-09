@@ -7,9 +7,14 @@ console.log(contactsPath);
 
 async function listContacts() {
   try {
-    await fsPromises
+
+    const contactsList = await fsPromises
       .readFile(contactsPath, 'utf-8')
-      .then(result => console.table(JSON.parse(result)));
+      .then(result => {
+        return JSON.parse(result);
+      });
+    return contactsList;
+
   } catch (err) {
     throw err;
   }
@@ -17,16 +22,20 @@ async function listContacts() {
 
 // listContacts(contactsPath);
 
-async function getContactById(contactsPath, contactId) {
+async function getContactById(contactId) {
   try {
-    await fsPromises.readFile(contactsPath, 'utf-8').then(result => {
-      const allContacts = JSON.parse(result);
+    const user = await fsPromises
+      .readFile(contactsPath, 'utf-8')
+      .then(result => {
+        const allContacts = JSON.parse(result);
 
-      const findContactId = allContacts.find(
-        contact => contact.id === contactId,
-      );
-      console.table(findContactId);
-    });
+        const findContactId = allContacts.find(
+          contact => contact.id === Number(contactId),
+        );
+        return findContactId;
+      });
+    return user;
+
   } catch (err) {
     throw err;
   }
@@ -34,16 +43,20 @@ async function getContactById(contactsPath, contactId) {
 
 // getContactById(1);
 
-async function removeContact(contactsPath, contactId) {
+async function removeContact(contactId) {
   try {
-    await fsPromises.readFile(contactsPath, 'utf-8').then(result => {
-      const allContacts = JSON.parse(result);
-      //   console.log(allContacts);
-      const removeContactId = allContacts.filter(
-        contact => contact.id !== contactId,
-      );
-      console.table(removeContactId);
-    });
+    const delContact = await fsPromises
+      .readFile(contactsPath, 'utf-8')
+      .then(result => {
+        const allContacts = JSON.parse(result);
+        const removeContactId = allContacts.filter(
+          contact => contact.id !== contactId,
+        );
+        const delUser = allContacts.find(contact => contact.id === contactId);
+        return delUser;
+      });
+    return delContact;
+
   } catch (err) {
     throw err;
   }
@@ -51,21 +64,38 @@ async function removeContact(contactsPath, contactId) {
 
 // removeContact(1);
 
-async function addContact(contactsPath, name, email, phone) {
+
+async function addContact(newUser) {
   try {
-    await fsPromises.readFile(contactsPath, 'utf-8').then(result => {
-      const allContacts = JSON.parse(result);
-      //   console.log(allContacts);
-      const findId = allContacts[allContacts.length - 1].id;
-      //   console.log(findId);
-      const newContact = {
-        id: findId + 1,
-        name,
-        email,
-        phone,
-      };
-      console.table(newContact);
-    });
+    const listWithUser = await fsPromises
+      .readFile(contactsPath, 'utf-8')
+      .then(result => {
+        const allContacts = JSON.parse(result);
+        allContacts.push(newUser);
+        return allContacts;
+      });
+    return listWithUser;
+  } catch (err) {
+    throw err;
+  }
+}
+
+async function updateContact(contactId, dataUpdate) {
+  try {
+    const updateUserFields = await fsPromises
+      .readFile(contactsPath, 'utf-8')
+      .then(result => {
+        const allContacts = JSON.parse(result);
+        const updateUser = allContacts.map(contact =>
+          contact.id === contactId ? { ...contact, ...dataUpdate } : contact,
+        );
+        const findContactId = updateUser.find(
+          contact => contact.id === contactId,
+        );
+        return findContactId;
+      });
+    return updateUserFields;
+
   } catch (err) {
     throw err;
   }
@@ -79,4 +109,7 @@ module.exports = {
   getContactById,
   removeContact,
   addContact,
+
+  updateContact,
+
 };
