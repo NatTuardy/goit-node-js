@@ -7,12 +7,14 @@ console.log(contactsPath);
 
 async function listContacts() {
   try {
+
     const contactsList = await fsPromises
       .readFile(contactsPath, 'utf-8')
       .then(result => {
         return JSON.parse(result);
       });
     return contactsList;
+
   } catch (err) {
     throw err;
   }
@@ -33,6 +35,7 @@ async function getContactById(contactId) {
         return findContactId;
       });
     return user;
+
   } catch (err) {
     throw err;
   }
@@ -53,12 +56,14 @@ async function removeContact(contactId) {
         return delUser;
       });
     return delContact;
+
   } catch (err) {
     throw err;
   }
 }
 
 // removeContact(1);
+
 
 async function addContact(newUser) {
   try {
@@ -90,6 +95,7 @@ async function updateContact(contactId, dataUpdate) {
         return findContactId;
       });
     return updateUserFields;
+
   } catch (err) {
     throw err;
   }
@@ -103,5 +109,7 @@ module.exports = {
   getContactById,
   removeContact,
   addContact,
+
   updateContact,
+
 };
