@@ -67,7 +67,6 @@ exports.getLoggetUser = (req, res) => {
 
 exports.logout = async (req, res, next) => {
   const userId = req.user._id;
-  console.log(userId);
   if (!userId) {
     return res.status(401).send('Not authorized');
   }
