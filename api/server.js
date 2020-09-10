@@ -1,63 +1,60 @@
-require('./config');
-const express = require('express');
-const cookieParser = require('cookie-parser');
-const mongoose = require('mongoose');
-const morgan = require('morgan');
-const cors = require('cors');
-const { authRouter } = require('./auth/auth.router');
+const express = require("express");
+const cors = require("cors");
+require("dotenv").config();
+const contactRouter = require("./contacts/contacts.router");
+const morgan = require("morgan");
+const mongoose = require("mongoose");
+const userRouter = require("./users/users.router");
 
-module.exports = class AuthServer {
+module.exports = class ContactsServer {
   constructor() {
-    this.app = null;
+    this.server = null;
   }
+
   async start() {
     this.initServer();
     await this.initDatabaseConnection();
-    this.initMiddleware();
+    this.initMiddlewares();
     this.initRoutes();
-    this.initErrorHandling();
     this.startListening();
+    this.initErrorHandling();
   }
 
   initServer() {
-    this.app = express();
+    this.server = express();
   }
 
   async initDatabaseConnection() {
+    mongoose.set("useCreateIndex", true);
     await mongoose.connect(process.env.MONGODB_URL, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      useFindAndModify: false,
-      useCreateIndex: true,
+      useFindAndModify: true,
     });
   }
 
-  initMiddleware() {
-    this.app.use(express.json());
-    this.app.use(cookieParser());
-    this.app.use(cors({ origin: 'http://localhost:3000' }));
-    this.app.use(morgan('tiny'));
+  initMiddlewares() {
+    this.server.use(express.json());
+    this.server.use(morgan("tiny"));
+    this.server.use(cors({ origin: "http://localhost:3000" }));
+    this.server.use("/images", express.static(process.env.STATIC_BASE_PATH));
   }
 
   initRoutes() {
-    this.app.use('/auth', authRouter);
-    this.app.post('/', (req, res) => {
-      res.send('hello gad');
+    this.server.use("/contacts", contactRouter);
+    this.server.use("/users", userRouter);
+  }
+
+  startListening() {
+    this.server.listen(process.env.PORT, () => {
+      console.log("Server started listening on port", process.env.PORT);
     });
   }
 
   initErrorHandling() {
-    this.app.use((err, req, res, next) => {
+    this.server.use((err, req, res, next) => {
       const statusCode = err.status || 500;
       return res.status(statusCode).send(err.message);
-    });
-  }
-
-  startListening() {
-    const { PORT } = process.env;
-
-    this.app.listen(PORT, () => {
-      console.log('Server started listening on port', process.env.PORT);
     });
   }
 };
